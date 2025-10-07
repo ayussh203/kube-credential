@@ -1,7 +1,10 @@
 import request from 'supertest';
 import app from '../src/app';
+import { resetDb } from '../src/db/sqlite';
 
 describe('Credential validation', () => {
+  beforeEach(() => resetDb());
+
   const valid = {
     subject: 'did:example:alice',
     issuer: 'did:example:issuer',
@@ -9,11 +12,11 @@ describe('Credential validation', () => {
     claims: { level: 'gold', score: 95 }
   };
 
-  it('accepts a valid payload', async () => {
+  it('accepts a valid payload and issues', async () => {
     const res = await request(app).post('/api/issue').send(valid);
-    expect(res.status).toBe(200);
-    expect(res.body.message).toBe('valid');
-    expect(res.body.received.subject).toBe(valid.subject);
+    expect(res.status).toBe(201);
+    expect(res.body.message).toMatch(/^credential issued by worker-/);
+    expect(res.body.payload.subject).toBe(valid.subject);
   });
 
   it('rejects missing fields', async () => {

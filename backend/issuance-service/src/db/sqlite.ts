@@ -41,3 +41,8 @@ export function pingDb(): boolean {
     return false;
   }
 }
+
+export function resetDb(): void {
+  const d = getDb();
+  d.prepare('DELETE FROM issued_credentials').run();
+}
