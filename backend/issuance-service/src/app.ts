@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import logger from './utils/logger';
 import { healthRouter } from './routes/health';
+import { issueRouter } from './routes/issue'; // <-- add this
 import { errorHandler } from './middleware/error';
 
 const app = express();
@@ -18,7 +19,9 @@ app.use(
   })
 );
 
+// Routes
 app.use('/', healthRouter);
+app.use('/', issueRouter); // <-- add this
 
 app.get('/', (_req, res) => {
   res.json({ service: 'issuance-service', ok: true });
