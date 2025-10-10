@@ -1,5 +1,5 @@
 {
-  "name": "@kube-credential/issuance-service",
+  "name": "@kube-credential/verification-service",
   "version": "0.1.0",
   "main": "index.js",
   "directories": {
@@ -8,7 +8,7 @@
   "scripts": {
     "test": "jest --passWithNoTests",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-     "build": "tsc -p tsconfig.build.json",
+   "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",

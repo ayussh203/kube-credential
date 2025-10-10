@@ -9,10 +9,10 @@ export function getDb(): Database.Database {
   if (db) return db;
 
   // ensure directory exists
-  const dir = path.dirname(env.DB_FILE);
+  const dir = path.dirname(env.ISSUANCE_DB_FILE);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-  db = new Database(env.DB_FILE, { fileMustExist: false });
+  db = new Database(env.ISSUANCE_DB_FILE, { fileMustExist: false });
 
   // pragmas for reliability
   db.pragma('journal_mode = WAL');
