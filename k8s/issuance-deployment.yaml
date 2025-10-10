@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: issuance-service
+  namespace: kube-credential
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: issuance-service
+  template:
+    metadata:
+      labels:
+        app: issuance-service
+    spec:
+      securityContext:
+        fsGroup: 1000                 # <-- give group write on mounted volumes
+      containers:
+        - name: issuance
+          image: kube-credential-issuance:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1000           # run as the "node" user
+            runAsGroup: 1000
+          ports:
+            - containerPort: 4001
+          env:
+            - name: PORT
+              value: "4001"
+            - name: SERVICE_NAME
+              value: "issuance-service"
+            - name: LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: kube-credential-env
+                  key: LOG_LEVEL
+         
+            - name: ISSUANCE_DB_FILE
+              value: "/data/issuance.db"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+      volumes:
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: kc-shared-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: issuance-service
+  namespace: kube-credential
+spec:
+  selector:
+    app: issuance-service
+  ports:
+    - port: 4001
+      targetPort: 4001

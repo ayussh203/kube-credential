@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: verification-service
+  namespace: kube-credential
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: verification-service
+  template:
+    metadata:
+      labels:
+        app: verification-service
+    spec:
+      securityContext:
+        fsGroup: 1000          # make mounted volumes group-writable
+      containers:
+        - name: verification
+          image: kube-credential-verification:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 1000     # run as the "node" user
+            runAsGroup: 1000
+          ports:
+            - containerPort: 4002
+          env:
+            - name: PORT
+              value: "4002"
+            - name: SERVICE_NAME
+              value: "verification-service"
+            - name: LOG_LEVEL
+              valueFrom:
+                secretKeyRef:
+                  name: kube-credential-env
+                  key: LOG_LEVEL
+            - name: ISSUANCE_DB_FILE
+              value: "/data/issuance.db"
+            - name: VERIFICATION_DB_FILE
+              value: "/data/verification.db"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /data
+      volumes:
+        - name: shared-data
+          persistentVolumeClaim:
+            claimName: kc-shared-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: verification-service
+  namespace: kube-credential
+spec:
+  selector:
+    app: verification-service
+  ports:
+    - port: 4002
+      targetPort: 4002
